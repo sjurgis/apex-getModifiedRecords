@@ -44,4 +44,4 @@ Will output:
 
 
 Potential for improvements:
-* Return map< string, set<id> > where string is field name which can then be easily iterated.
+* Return map< string, set< id > > where string is field name which can then be easily iterated.
