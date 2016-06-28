@@ -17,7 +17,12 @@ Instead, why not use this way:
 
 ```java
 trigger AccountTrigger on Account (before update) {
-    system.debug( 'modified '+ xu.getModifiedRecords ( trigger.newMap, trigger.oldMap, new set<string> {'Name', 'Description' } ).keySet()  );
+    system.debug( 
+      'modified '+ 
+      xu.getModifiedRecords ( 
+        trigger.newMap, 
+        trigger.oldMap, 
+        new set<string> {'Name', 'Description' } ).keySet()  );
 }
 ```
 
