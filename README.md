@@ -17,36 +17,15 @@ Instead, why not use this way:
 
 ```java
 trigger AccountTrigger on Account (before update) {
-    system.debug( 
-      'modified '+ 
+    system.debug(
       xu.getModifiedRecords ( 
         trigger.newMap, 
         trigger.oldMap, 
-        new set<string> {'Name', 'Description' } ).keySet()  );
+        new set<string> {'Name', 'Description' },
+        new set<string> {'Id', 'Name' }) );
 }
 ```
+This will return Id and Name fields, whenever Name or Description fields have been modified. Useful to use with Platform Events where you just want to publish deltas. You can store fields in some custom settings to provide maximum configurability.
 
-Simple test case:
+**Important**: This doesn't work with system fields like CreatedDate as you cannot construct sobject with this field specified.
 
-```java
-delete[select id from account];
-for ( integer i = 0; i<4; i++)
-    insert new account ( 
-        name = 'number '+i, 
-        tradestyle = 'none', 
-        description = 'test-description');
-
-account[] acc = [select id, name,description from account limit 4];
-acc[0].name = 'bob';
-acc[1].description = 'buy-a-lot';
-acc[2].tradestyle = 'swag';
-update acc;
-```
-
-Will output:
-
-`10:32:04:499 USER_DEBUG [7]|DEBUG|modified {0012400000gfLgxAAE, 0012400000gfLgyAAE}`
-
-
-Potential for improvements:
-* Return map< string, set< id > > where string is field name which can then be easily iterated.
