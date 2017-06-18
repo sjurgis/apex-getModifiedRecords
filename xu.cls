@@ -1,29 +1,37 @@
 public class xu {
-    
-    public static map<id, sobject> getModifiedRecords( map<id, sobject> nm, map<id, sobject> om, set<string> fields){
-        return getModifiedRecords ( nm, om, fields, new map<id, sobject>() );
-    }
-    
-    public static map<id, sobject> getModifiedRecords( map<id, sobject> nm, map<id, sobject> om, set<string> fields, map<id, sobject> ret ){
-        for ( sobject n: nm.values() ){
-            map<string, object> nv = n.getPopulatedFieldsAsMap();
-            set<string> modifiedFields = getModifiedFields ( nv, om.get(n.id).getPopulatedFieldsAsMap(), new set<string>(fields) );
-            if ( ! modifiedFields.isEmpty() ){
-                if ( ret.containsKey( n.id ) )
-                    for ( string s : fields )
-                    	ret.get(n.id).put(s, nv.get(s) );
-                else
-                    ret.put( n.id, n );
-            }   
-        }    
-        return ret;
-    }
-    
-    static set<string> getModifiedFields( map<string, object> nm, map<string, object> om, final set<string> fields ){
-        for (string s: fields){
-            if ( nm.get(s) == om.get(s) )
-                fields.remove(s);
-        }        
-        return fields;
-    }
+	public static sobject[] getModifiedRecords(
+		map<id, sobject> newMap,
+		map<id, sobject> oldMap,
+		set<string> triggerFields,
+		set<string> returnFields ){
+		sobject[] ret;
+		for ( sobject i : newMap.values() ) {
+			map<string, object> newFields = i.getPopulatedFieldsAsMap();
+			map<string, object> oldFields = oldMap.get(i.id).getPopulatedFieldsAsMap();
+			sobject sob = getRecord( i, newFields, oldFields, new set<string>( triggerFields ), returnFields);
+			if ( sob != null ) {
+				if ( ret == null ) ret = new sobject[] {};
+				ret.add( sob );
+			}
+		}
+		return ret;
+	}
+	static sobject getRecord(
+		sobject i,
+		map<string, object> newFields,
+		map<string, object> oldFields,
+		final set<string> fields,
+		set<string> returnFields){
+		SObject sob;
+		for ( string s : fields ) {
+			if ( newFields.get(s) == oldFields.get(s) ) {
+				fields.remove(s);
+			} else {
+				if ( sob == null ) sob = i.getSObjectType().newSObject();
+				for ( string j : returnFields )
+					sob.put( j, newFields.get(j));
+			}
+		}
+		return sob;
+	}
 }
